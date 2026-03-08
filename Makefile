@@ -1,25 +1,30 @@
-VM_NAME := custom_fedora
+# VM config
+VM_NAME := 'Personal Fedora'
+MEMORY := 4096
+VCPUS := 4
 
-# ISO information
+# ISO config
 BASE_ISO_PATH := ./Fedora-Everything-netinst-x86_64-43-1.6.iso
-CUSTOM_ISO_NAME := Fedora-43-Personal-x86_64.iso
+PERSONAL_ISO_NAME := Fedora-43-Personal-x86_64.iso
 ISO_DIST_DIR := ./dist
-CUSTOM_ISO_PATH := ${ISO_DIST_DIR}/${CUSTOM_ISO_NAME}
+PERSONAL_ISO_PATH := ${ISO_DIST_DIR}/${PERSONAL_ISO_NAME}
 VOLID := Fedora_43_P_x86_64
 
-# Project information
+# Project structure
 SRC_DIR := ./src
 TMP_DIR := ./tmp
 
 # Kickstart information
-ROOT_PASSWD := $(shell grep ROOT_PASSWD ./.secrets | awk -F= '{print $2}')
-USER_PASSWD := $(shell grep USER_PASSWD ./.secrets | awk -F= '{print $2}')
+# ROOT_PASSWD := $(shell awk -F= '/^ROOT_PASSWD=/ {print $2}' ./.secrets)
+# USER_PASSWD := $(shell awk -F= '/^USER_PASSWD=/ {print $2}' ./.secrets)
+ROOT_PASSWD := $(shell grep -E '^ROOT_PASSWD=' ./.secrets | cut -d= -f2)
+USER_PASSWD := $(shell grep -E '^USER_PASSWD=' ./.secrets | cut -d= -f2)
 
-.PHONY: os_install destroy_vm clean build
+.PHONY: install_os destroy_vm clean build
 
-${CUSTOM_ISO_PATH}: ${BASE_ISO_PATH} ${ISO_DIST_DIR} ${SRC_DIR}/grub.cfg ${SRC_DIR}/kickstart.cfg ${TMP_DIR}
-	if [[ -f ${CUSTOM_ISO_PATH} ]]; then \
-		rm ${CUSTOM_ISO_PATH}; \
+build: ${BASE_ISO_PATH} ${ISO_DIST_DIR} ${SRC_DIR}/grub.cfg ${SRC_DIR}/kickstart.cfg ${TMP_DIR}
+	if [[ -f ${PERSONAL_ISO_PATH} ]]; then \
+		rm ${PERSONAL_ISO_PATH}; \
 	fi
 
 	# Fill kickstart.cfg placeholders
@@ -35,7 +40,7 @@ ${CUSTOM_ISO_PATH}: ${BASE_ISO_PATH} ${ISO_DIST_DIR} ${SRC_DIR}/grub.cfg ${SRC_D
 	sed -i 's/@@@VOLID@@@/${VOLID}/g' ${TMP_DIR}/tmp_grub.cfg
 
 	xorriso -indev ${BASE_ISO_PATH} \
-		-outdev ${CUSTOM_ISO_PATH} \
+		-outdev ${PERSONAL_ISO_PATH} \
 		-volid ${VOLID} \
 		-compliance no_emul_toc \
 		-map ${TMP_DIR}/tmp_kickstart.cfg /kickstart.cfg \
@@ -43,15 +48,27 @@ ${CUSTOM_ISO_PATH}: ${BASE_ISO_PATH} ${ISO_DIST_DIR} ${SRC_DIR}/grub.cfg ${SRC_D
 		-map ${SRC_DIR}/bin /bin \
 		-boot_image any replay
 
-os_install: destroy_vm build
+
+install_os: destroy_vm ${PERSONAL_ISO_PATH}
 	virt-install \
 		--name ${VM_NAME} \
-		--memory 4096 \
-		--vcpus 4 \
+		--memory ${MEMORY} \
+		--vcpus ${VCPUS} \
 		--disk path=${ISO_DIST_DIR}/fedora.qcow2,size=40,format=qcow2 \
 		--virt-type kvm \
-		--cdrom ${CUSTOM_ISO_PATH} \
+		--cdrom ${PERSONAL_ISO_PATH} \
 		--os-variant fedora-unknown
+
+load_os: ${ISO_DIST_DIR}/fedora.qcow2
+	virt-install \
+		--import \
+		--name ${VM_NAME} \
+		--memory ${MEMORY} \
+		--vcpus ${VCPUS} \
+		--disk path=${ISO_DIST_DIR}/fedora.qcow2,format=qcow2 \
+		--virt-type kvm \
+		--os-variant fedora-unknown
+
 
 destroy_vm:
 	if virsh list | grep ${VM_NAME}; then \
