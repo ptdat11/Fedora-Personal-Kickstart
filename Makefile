@@ -15,29 +15,15 @@ SRC_DIR := ./src
 TMP_DIR := ./tmp
 
 # Kickstart information
-# ROOT_PASSWD := $(shell awk -F= '/^ROOT_PASSWD=/ {print $2}' ./.secrets)
-# USER_PASSWD := $(shell awk -F= '/^USER_PASSWD=/ {print $2}' ./.secrets)
-ROOT_PASSWD := $(shell grep -E '^ROOT_PASSWD=' ./.secrets | cut -d= -f2)
-USER_PASSWD := $(shell grep -E '^USER_PASSWD=' ./.secrets | cut -d= -f2)
+ROOT_PASSWD = $(shell grep -E '^ROOT_PASSWD=' ./.secrets | cut -d= -f2)
+USER_PASSWD = $(shell grep -E '^USER_PASSWD=' ./.secrets | cut -d= -f2)
 
 .PHONY: install_os destroy_vm clean build
 
-build: ${BASE_ISO_PATH} ${ISO_DIST_DIR} ${SRC_DIR}/grub.cfg ${SRC_DIR}/kickstart.cfg ${TMP_DIR}
+build: ${BASE_ISO_PATH} ${ISO_DIST_DIR} ${TMP_DIR}/tmp_grub.cfg ${TMP_DIR}/tmp_kickstart.cfg $(wildcard ${SRC_DIR}/bin/*)
 	if [[ -f ${PERSONAL_ISO_PATH} ]]; then \
 		rm ${PERSONAL_ISO_PATH}; \
 	fi
-
-	# Fill kickstart.cfg placeholders
-	cp ${SRC_DIR}/kickstart.cfg ${TMP_DIR}/tmp_kickstart.cfg
-	cat ${SRC_DIR}/packages.lst >> ${TMP_DIR}/tmp_kickstart.cfg
-	echo '%end' >> ${TMP_DIR}/tmp_kickstart.cfg
-
-	sed -i 's|@@@ROOT_PASSWD@@@|${ROOT_PASSWD}|' ${TMP_DIR}/tmp_kickstart.cfg
-	sed -i 's|@@@USER_PASSWD@@@|${USER_PASSWD}|' ${TMP_DIR}/tmp_kickstart.cfg
-
-	# Fill grub.cfg placeholders
-	cp ${SRC_DIR}/grub.cfg ${TMP_DIR}/tmp_grub.cfg
-	sed -i 's/@@@VOLID@@@/${VOLID}/g' ${TMP_DIR}/tmp_grub.cfg
 
 	xorriso -indev ${BASE_ISO_PATH} \
 		-outdev ${PERSONAL_ISO_PATH} \
@@ -49,7 +35,7 @@ build: ${BASE_ISO_PATH} ${ISO_DIST_DIR} ${SRC_DIR}/grub.cfg ${SRC_DIR}/kickstart
 		-boot_image any replay
 
 
-install_os: destroy_vm ${PERSONAL_ISO_PATH}
+install_os: destroy_vm build
 	virt-install \
 		--name ${VM_NAME} \
 		--memory ${MEMORY} \
@@ -87,4 +73,14 @@ ${SRC_DIR}:
 ${TMP_DIR}:
 	mkdir -p ${TMP_DIR}
 
+${TMP_DIR}/tmp_kickstart.cfg: ${TMP_DIR} ${SRC_DIR}/kickstart.cfg ${SRC_DIR}/packages.lst
+	cp ${SRC_DIR}/kickstart.cfg ${TMP_DIR}/tmp_kickstart.cfg
+	cat ${SRC_DIR}/packages.lst >> ${TMP_DIR}/tmp_kickstart.cfg
+	echo '%end' >> ${TMP_DIR}/tmp_kickstart.cfg
 
+	sed -i 's|@@@ROOT_PASSWD@@@|${ROOT_PASSWD}|' ${TMP_DIR}/tmp_kickstart.cfg
+	sed -i 's|@@@USER_PASSWD@@@|${USER_PASSWD}|' ${TMP_DIR}/tmp_kickstart.cfg
+
+${TMP_DIR}/tmp_grub.cfg: ${TMP_DIR} ${SRC_DIR}/grub.cfg
+	cp ${SRC_DIR}/grub.cfg ${TMP_DIR}/tmp_grub.cfg
+	sed -i 's/@@@VOLID@@@/${VOLID}/g' ${TMP_DIR}/tmp_grub.cfg

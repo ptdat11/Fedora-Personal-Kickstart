@@ -1,7 +1,7 @@
 @standard
 @networkmanager-submodules
-@virtualization
-@container-management
+@virtualization --optional
+@container-management --optional
 @libreoffice
 @firefox
 @base-graphical
