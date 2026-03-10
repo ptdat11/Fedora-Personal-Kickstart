@@ -45,7 +45,7 @@ install_os: destroy_vm build
 		--cdrom ${PERSONAL_ISO_PATH} \
 		--os-variant fedora-unknown
 
-load_os: ${ISO_DIST_DIR}/fedora.qcow2
+load_os: destroy_vm ${ISO_DIST_DIR}/fedora.qcow2
 	virt-install \
 		--import \
 		--name ${VM_NAME} \
