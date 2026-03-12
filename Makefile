@@ -43,7 +43,9 @@ install_os: destroy_vm build
 		--disk path=${ISO_DIST_DIR}/fedora.qcow2,size=40,format=qcow2 \
 		--virt-type kvm \
 		--cdrom ${PERSONAL_ISO_PATH} \
-		--os-variant fedora-unknown
+		--os-variant fedora-unknown \
+		--boot uefi \
+		--check path_in_use=off
 
 load_os: destroy_vm ${ISO_DIST_DIR}/fedora.qcow2
 	virt-install \
@@ -53,8 +55,9 @@ load_os: destroy_vm ${ISO_DIST_DIR}/fedora.qcow2
 		--vcpus ${VCPUS} \
 		--disk path=${ISO_DIST_DIR}/fedora.qcow2,format=qcow2 \
 		--virt-type kvm \
-		--os-variant fedora-unknown
-
+		--os-variant fedora-unknown \
+		--boot uefi \
+		--check path_in_use=off
 
 destroy_vm:
 	if virsh list | grep ${VM_NAME}; then \
