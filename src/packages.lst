@@ -7,6 +7,7 @@
 @firefox
 @base-graphical
 @multimedia
+@sound-and-video --optional
 
 # Individual packages
 xdg-utils
@@ -15,5 +16,11 @@ pciutils
 usbutils
 kmodtool
 akmods
-mokutils
+mokutil
 openssl
+htop
+nvtop
+vim
+nvim
+fd
+zsh

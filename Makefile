@@ -16,8 +16,10 @@ TMP_DIR := ./tmp
 MOUNT_DIR := ./base-iso
 
 # Kickstart information
+USER = $(shell grep -E '^USER=' ./config | cut -d= -f2)
 ROOT_PASSWD = $(shell grep -E '^ROOT_PASSWD=' ./.secrets | cut -d= -f2)
 USER_PASSWD = $(shell grep -E '^USER_PASSWD=' ./.secrets | cut -d= -f2)
+MOKUTIL_PASSWD = $(shell grep -E '^MOKUTIL_PASSWD=' ./.secrets | cut -d= -f2)
 
 .PHONY: install_os destroy_vm clean build
 
@@ -35,6 +37,8 @@ ${PERSONAL_ISO_PATH}: ${BASE_ISO_PATH} ${ISO_DIST_DIR} ${TMP_DIR}/tmp_grub.cfg $
 	cp ${TMP_DIR}/tmp_grub.cfg ${MOUNT_DIR}/boot/grub2/grub.cfg
 	cp ${TMP_DIR}/tmp_grub.cfg ${MOUNT_DIR}/EFI/BOOT/grub.cfg
 	cp -r ${SRC_DIR}/bin ${MOUNT_DIR}
+
+	sed -i 's/@@@MOKUTIL_PASSWD@@@/${MOKUTIL_PASSWD}/' ${MOUNT_DIR}/bin/post_install.sh
 
 	xorriso -as mkisofs \
 		-o ${PERSONAL_ISO_PATH} \
@@ -69,6 +73,7 @@ install_os: destroy_vm ${PERSONAL_ISO_PATH}
 		--virt-type kvm \
 		--cdrom ${PERSONAL_ISO_PATH} \
 		--os-variant fedora-unknown \
+		--boot uefi \
 		--check path_in_use=off
 
 load_os: destroy_vm ${ISO_DIST_DIR}/fedora.qcow2
@@ -86,7 +91,7 @@ destroy_vm:
 	if virsh list | grep ${VM_NAME}; then \
 		virsh shutdown ${VM_NAME}; \
 		virsh destroy ${VM_NAME}; \
-		virsh undefine ${VM_NAME} --nvram; \
+		virsh undefine ${VM_NAME} --managed-save --nvram; \
 	fi
 
 
@@ -104,8 +109,9 @@ ${TMP_DIR}/tmp_kickstart.cfg: ${TMP_DIR} ${SRC_DIR}/kickstart.cfg ${SRC_DIR}/pac
 	cat ${SRC_DIR}/packages.lst >> ${TMP_DIR}/tmp_kickstart.cfg
 	echo '%end' >> ${TMP_DIR}/tmp_kickstart.cfg
 
-	sed -i 's|@@@ROOT_PASSWD@@@|${ROOT_PASSWD}|' ${TMP_DIR}/tmp_kickstart.cfg
-	sed -i 's|@@@USER_PASSWD@@@|${USER_PASSWD}|' ${TMP_DIR}/tmp_kickstart.cfg
+	sed -i 's|@@@USER@@@|${USER}|g' ${TMP_DIR}/tmp_kickstart.cfg
+	sed -i 's|@@@ROOT_PASSWD@@@|${ROOT_PASSWD}|g' ${TMP_DIR}/tmp_kickstart.cfg
+	sed -i 's|@@@USER_PASSWD@@@|${USER_PASSWD}|g' ${TMP_DIR}/tmp_kickstart.cfg
 
 ${TMP_DIR}/tmp_grub.cfg: ${TMP_DIR} ${SRC_DIR}/grub.cfg
 	cp ${SRC_DIR}/grub.cfg ${TMP_DIR}/tmp_grub.cfg
