@@ -9,6 +9,7 @@ PERSONAL_ISO_NAME := Fedora-43-Personal-x86_64.iso
 ISO_DIST_DIR := ./dist
 PERSONAL_ISO_PATH := ${ISO_DIST_DIR}/${PERSONAL_ISO_NAME}
 VOLID := Fedora_P_x86_64
+BOOT := uefi # {bios|uefi}
 
 # Project structure
 SRC_DIR := ./src
@@ -73,7 +74,7 @@ install_os: destroy_vm ${PERSONAL_ISO_PATH}
 		--virt-type kvm \
 		--cdrom ${PERSONAL_ISO_PATH} \
 		--os-variant fedora-unknown \
-		--boot uefi \
+		--boot ${BOOT} \
 		--check path_in_use=off
 
 load_os: destroy_vm ${ISO_DIST_DIR}/fedora.qcow2
@@ -85,6 +86,7 @@ load_os: destroy_vm ${ISO_DIST_DIR}/fedora.qcow2
 		--disk path=${ISO_DIST_DIR}/fedora.qcow2,format=qcow2 \
 		--virt-type kvm \
 		--os-variant fedora-unknown \
+		--boot ${BOOT} \
 		--check path_in_use=off
 
 destroy_vm:
