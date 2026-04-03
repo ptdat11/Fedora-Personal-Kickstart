@@ -54,6 +54,8 @@ install_astronvim() {
 	local user="$1"
 	runuser -l "$user" -c 'git clone --depth 1 https://github.com/AstroNvim/template ~/.config/nvim'
 	runuser -l "$user" -c 'rm -rf ~/.config/nvim/.git'
+
+	sed -E 's/^(\s*relativenumber\s*=\s*)(true|false)(.*)/\1false\3/' ~/.config/nvim/lua/plugins/astrocore.lua
 }
 
 install_fcitx5_lotus() {
@@ -80,9 +82,18 @@ install_zsh() {
 	local user="$1"
 
 	usermod --shell /bin/zsh "$user"
-	runuser -l "$user" -c 'sed -i -E "s/shell\s+fish/ shell zsh/" ~/.config/kitty/kitty.conf'
 	runuser -l "$user" -c 'echo "eval \"\$(starship init zsh)\"" >> ~/.config/zshrc.d/75-starship.zsh'
 	runuser -l "$user" -c 'echo "source ~/.config/zshrc.d/*.zsh" >> ~/.zshrc'
+
+	fish_2_zsh_files=(
+		~/.config/foot/foot.ini
+		~/.config/illogical-impulse/config.json
+		~/.config/kitty/kitty.conf
+		~/.config/hypr/custom/keybinds.conf
+		~/.config/hypr/hyprland/keybinds.conf
+		~/.config/quickshell/ii/modules/common/Config.qml
+	)
+	runuser -l "$user" -c "sed -i 's/fish/zsh/' ${fish_2_zsh_files[@]}"
 
 	dnf remove -y fish
 	runuser -l "$user" -c 'rm -rf ~/.config/fish'
