@@ -32,13 +32,13 @@ ${PERSONAL_ISO_PATH}: ${BASE_ISO_PATH} ${ISO_DIST_DIR} ${TMP_DIR}/tmp_grub.cfg $
 
 	if ! mountpoint -q ${MOUNT_DIR}; then \
 		mkdir -p ${MOUNT_DIR}; \
-		osirrox -indev Fedora-Everything-netinst-x86_64-43-1.6.iso -extract / ${MOUNT_DIR}; \
+		osirrox -indev ${BASE_ISO_PATH} -extract / ${MOUNT_DIR}; \
 	fi
 	cp ${TMP_DIR}/tmp_kickstart.cfg ${MOUNT_DIR}/kickstart.cfg
 	cp ${TMP_DIR}/tmp_grub.cfg ${MOUNT_DIR}/boot/grub2/grub.cfg
 	cp ${TMP_DIR}/tmp_grub.cfg ${MOUNT_DIR}/EFI/BOOT/grub.cfg
 	cp -r ${SRC_DIR}/bin ${MOUNT_DIR}
-	cp -r ${SRC_DIR}/dots-hyprland ${MOUNT_DIR}
+	rsync -a ${SRC_DIR}/dots-hyprland ${MOUNT_DIR}
 
 	sed -i 's/@@@MOKUTIL_PASSWD@@@/${MOKUTIL_PASSWD}/' ${MOUNT_DIR}/bin/post_install.sh
 
@@ -97,6 +97,9 @@ destroy_vm:
 		virsh undefine ${VM_NAME} --managed-save --nvram; \
 	fi
 
+
+${BASE_ISO_PATH}:
+	curl -L -O https://download.fedoraproject.org/pub/fedora/linux/releases/43/Everything/x86_64/iso/Fedora-Everything-netinst-x86_64-43-1.6.iso
 
 ${ISO_DIST_DIR}:
 	mkdir -p ${ISO_DIST_DIR}
