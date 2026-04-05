@@ -126,18 +126,11 @@ echo "$me: path to clone: $local_path"
 echo "$me: params to pass: $@"
 
 detect_distro_id
-auto_install_git
-echo "$me: Downloading repo to $local_path ..."
-x mkdir -p $local_path
+echo "$me: Copying repo from /opt/dots-hyprland to $local_path ..."
+x mkdir -p "$(dirname $local_path)"
+x cp -r /opt/dots-hyprland "$local_path"
 x cd $local_path
-if [ -z "$(ls -A)" ]; then
-  x git init -b main
-  x git remote add origin https://github.com/$remote_repo
-fi
-git remote get-url origin|grep -q $remote_repo || { echo "Dir \"$local_path\" is not empty, nor a git repo of $remote_repo. Aborting..."; exit 1 ; }
-x git pull origin main && git submodule update --init --recursive
-x git branch --set-upstream-to=origin/main main
 x sed -i 's|<\s*/dev/tty||' ./sdata/dist-fedora/install-deps.sh
-echo "$me: Downloaded."
+echo "$me: Copied."
 echo "$me: Running \"./setup install\"."
 x ./setup install "$@" || { echo "$me: Error occured when running \"./setup install\"."; exit 1 ; }

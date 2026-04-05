@@ -25,6 +25,10 @@ setup_xdg() {
     runuser -l "$user" -c "mv \"\$HOME/$dirname\" \"\$HOME/$dirname_lower\""
     runuser -l "$user" -c "sed -i 's/$dirname/$dirname_lower/' \"\$HOME/.config/user-dirs.dirs\""
   done
+
+	# Set default apps
+  xdg-mime default mpv.desktop video/mp4
+	xdg-mime default firefox.desktop application/pdf
 }
 
 mok_enroll_uefi() {
@@ -48,6 +52,9 @@ install_hyprland_end4() {
 	# Switch from command line to graphical environemnt
 	systemctl enable sddm
 	systemctl set-default graphical.target
+
+	# Fix an error where Swappy cannot open image properly from Dolphin
+	sed -E $'s#^Exec=.*#Exec=sh -c \'if [ -n "$*" ]; then exec swappy -f "$@"; else grim -g "$(slurp)" - | swappy -f -; fi\' -- %F#' /usr/share/applications/swappy.desktop
 }
 
 install_astronvim() {
@@ -78,13 +85,43 @@ install_fcitx5_lotus() {
 	runuser -l "$user" -c 'echo "exec-once = fcitx5 -d" >> ~/.config/hypr/custom/execs.conf'
 }
 
+add_omz_plugin() {
+    local plugin="$1"
+    local zshrc="$HOME/.zshrc"
+    
+    if grep -qE "^\s*plugins=\(.*\b${plugin}\b.*\)" "$zshrc"; then
+        return 0
+    fi
+
+    sed -i -E "s/^(\s*plugins=\([^)]*)\)/\1 $plugin)/" "$zshrc"
+}
 install_zsh() {
 	local user="$1"
 
-	usermod --shell /bin/zsh "$user"
-	runuser -l "$user" -c 'echo "eval \"\$(starship init zsh)\"" >> ~/.config/zshrc.d/75-starship.zsh'
-	runuser -l "$user" -c 'echo "source ~/.config/zshrc.d/*.zsh" >> ~/.zshrc'
+	# Install Oh My Zsh (plugin manager for zsh)
+	runuser -l "$user" -c 'yes | sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"'
+	runuser -l "$user" -c $'sed -i -E \'s/^\s*ZSH_THEME=.*/ZSH_THEME=""/\' ~/.zshrc'
+	# Install Oh My Zsh plugins
+	{
+		# zsh-autosuggestions
+		runuser -l "$user" -c 'git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions'
+		runuser -l "$user" -c "$(declare -f add_omz_plugin); add_omz_plugin zsh-autosuggestions"
 
+		# zsh-syntax-highlighting
+		runuser -l "$user" -c 'git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting'
+		runuser -l "$user" -c "$(declare -f add_omz_plugin); add_omz_plugin zsh-syntax-highlighting"
+
+		# zsh-vi-mode
+		runuser -l "$user" -c 'git clone https://github.com/jeffreytse/zsh-vi-mode ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-vi-mode'
+		runuser -l "$user" -c "$(declare -f add_omz_plugin); add_omz_plugin zsh-vi-mode"
+	}
+
+	# Apply all ~/.config/zshrc.d/*.zsh files
+	runuser -l "$user" -c 'echo "source ~/.config/zshrc.d/*.zsh" >> ~/.zshrc'
+	# Apply starship
+	runuser -l "$user" -c 'echo "eval \"\$(starship init zsh)\"" >> ~/.config/zshrc.d/75-starship.zsh'
+
+	# Replace End-4 default fish shell with zsh, entirely
 	fish_2_zsh_files=(
 		~/.config/foot/foot.ini
 		~/.config/illogical-impulse/config.json
@@ -95,6 +132,7 @@ install_zsh() {
 	)
 	runuser -l "$user" -c "sed -i 's/fish/zsh/' ${fish_2_zsh_files[@]}"
 
+	usermod --shell /bin/zsh "$user"
 	dnf remove -y fish
 	runuser -l "$user" -c 'rm -rf ~/.config/fish'
 }
