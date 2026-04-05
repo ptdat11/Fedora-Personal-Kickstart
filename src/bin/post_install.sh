@@ -54,7 +54,7 @@ install_hyprland_end4() {
 	systemctl set-default graphical.target
 
 	# Fix an error where Swappy cannot open image properly from Dolphin
-	sed -E $'s#^Exec=.*#Exec=sh -c \'if [ -n "$*" ]; then exec swappy -f "$@"; else grim -g "$(slurp)" - | swappy -f -; fi\' -- %F#' /usr/share/applications/swappy.desktop
+	sed -i -E $'s#^Exec=.*#Exec=sh -c \'if [ -n "$*" ]; then exec swappy -f "$@"; else grim -g "$(slurp)" - | swappy -f -; fi\' -- %F#' /usr/share/applications/swappy.desktop
 }
 
 install_astronvim() {
@@ -62,7 +62,7 @@ install_astronvim() {
 	runuser -l "$user" -c 'git clone --depth 1 https://github.com/AstroNvim/template ~/.config/nvim'
 	runuser -l "$user" -c 'rm -rf ~/.config/nvim/.git'
 
-	sed -E 's/^(\s*relativenumber\s*=\s*)(true|false)(.*)/\1false\3/' ~/.config/nvim/lua/plugins/astrocore.lua
+	runuser -l "$user" -c $'sed -E \'s/^(\s*relativenumber\s*=\s*)(true|false)(.*)/\1false\3/\' ~/.config/nvim/lua/plugins/astrocore.lua'
 }
 
 install_fcitx5_lotus() {
@@ -123,14 +123,16 @@ install_zsh() {
 
 	# Replace End-4 default fish shell with zsh, entirely
 	fish_2_zsh_files=(
-		~/.config/foot/foot.ini
-		~/.config/illogical-impulse/config.json
-		~/.config/kitty/kitty.conf
-		~/.config/hypr/custom/keybinds.conf
-		~/.config/hypr/hyprland/keybinds.conf
-		~/.config/quickshell/ii/modules/common/Config.qml
+		\$HOME/.config/foot/foot.ini
+		\$HOME/.config/illogical-impulse/config.json
+		\$HOME/.config/kitty/kitty.conf
+		\$HOME/.config/hypr/custom/keybinds.conf
+		\$HOME/.config/hypr/hyprland/keybinds.conf
+		\$HOME/.config/quickshell/ii/modules/common/Config.qml
 	)
-	runuser -l "$user" -c "sed -i 's/fish/zsh/' ${fish_2_zsh_files[@]}"
+	for file in ${fish_2_zsh_files[@]}; do
+		runuser -l "$user" -c "sed -i 's/fish/zsh/' $file"
+	done
 
 	usermod --shell /bin/zsh "$user"
 	dnf remove -y fish
