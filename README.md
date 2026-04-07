@@ -1,11 +1,76 @@
-# Fedora Kickstart
+# Fedora Personal ISO
 
-This project contains the necessary files to create a custom Fedora installation using Kickstart.
+This project provides a streamlined way to create a customized Fedora Everything netinst ISO with automated kickstart configuration, pre-installed packages, and pre-configured dotfiles/scripts.
 
-## About
+## Prerequisites
 
-The `kickstart.cfg` file automates the Fedora installation process. The `packages.lst` file specifies the packages to be installed, and the `post_install.sh` script runs after the installation to perform additional setup.
+Ensure you have the following tools installed on your system:
 
-## Usage
+- **ISO Tools**: `libisoburn` (provides `osirrox` and `xorriso`)
+- **System Tools**: `rsync`, `curl`, `util-linux` (for `mountpoint`)
+- **Virtualization (Optional, for testing)**: `virt-install`, `libvirt`, `qemu-kvm`
 
-To build the project, you can use the `Makefile` provided. Refer to the `Makefile` for available targets.
+## Configuration
+
+Before building the ISO, you need to set up your configuration and secrets.
+
+### 1. Secrets Configuration
+Create a `.secrets` file by copying the template:
+```bash
+cp template.secrets .secrets
+```
+Edit `.secrets` and provide the following passwords:
+- `ROOT_PASSWD`: Root user password.
+- `USER_PASSWD`: Personal user password.
+- `MOKUTIL_PASSWD`: Password for Secure Boot MOK utility.
+
+### 2. General Configuration
+Edit the `config` file to match your environment:
+- `USER`: The username for the primary account.
+- `DISK`: The target disk for installation (e.g., `nvme0n1` or `sda`).
+
+## Building the ISO
+
+To generate the custom ISO, simply run:
+
+```bash
+make build
+```
+
+This command will:
+1. Download the base Fedora Everything ISO (if not already present).
+2. Extract the base ISO to the `base-iso/` directory.
+3. Prepare the kickstart and GRUB configurations with your specified settings.
+4. Copy custom scripts (`src/bin`), dotfiles, and plugins into the ISO image.
+5. Create the final ISO at `dist/Fedora-43-Personal-x86_64.iso`.
+
+## Testing the ISO
+
+You can test the generated ISO in a virtual machine using KVM/libvirt:
+
+```bash
+make install_os
+```
+This will:
+1. Clean up any existing VM with the same name.
+2. Create a new 40GB virtual disk.
+3. Launch a VM and boot from your custom ISO.
+
+To manage the test VM:
+- **Stop and delete the VM**: `make destroy_vm`
+- **Re-launch existing installation**: `make load_os`
+
+## Project Structure
+
+- `src/kickstart.cfg`: The base kickstart configuration template.
+- `src/packages.lst`: List of package groups and individual packages to be installed.
+- `src/bin/`: Scripts that are copied to the ISO and can be executed post-install.
+- `src/dots-hyprland/`: Hyprland dotfiles.
+- `src/dots-nvim/`: Neovim configuration.
+- `src/zsh-plugins/`: Custom Zsh plugins.
+
+## Troubleshooting
+
+- **Permissions**: Ensure you have the necessary permissions to mount/extract ISOs or run `virt-install`.
+- **Base ISO**: If the download fails, you can manually place the `Fedora-Everything-netinst-x86_64-43-1.6.iso` file in the project root.
+- **Cleaning up**: Since the `clean` target is not fully defined, you can manually remove the `tmp/`, `dist/`, or `base-iso/` directories if you want a fresh start.
