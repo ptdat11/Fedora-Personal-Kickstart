@@ -1,2 +1,2 @@
 USER=ptdat
-DIST_DISK=nvme0n1
+DISK=nvme0n1

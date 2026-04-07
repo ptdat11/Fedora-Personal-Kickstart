@@ -21,6 +21,7 @@ USER = $(shell grep -E '^USER=' ./config | cut -d= -f2)
 ROOT_PASSWD = $(shell grep -E '^ROOT_PASSWD=' ./.secrets | cut -d= -f2 | tr -d ' ')
 USER_PASSWD = $(shell grep -E '^USER_PASSWD=' ./.secrets | cut -d= -f2 | tr -d ' ')
 MOKUTIL_PASSWD = $(shell grep -E '^MOKUTIL_PASSWD=' ./.secrets | cut -d= -f2 | tr -d ' ')
+DISK = $(shell grep -E '^DISK=' ./config | cut -d= -f2 | tr -d ' ')
 
 .PHONY: install_os destroy_vm clean build
 
@@ -120,6 +121,7 @@ ${TMP_DIR}/tmp_kickstart.cfg: ${TMP_DIR} ${SRC_DIR}/kickstart.cfg ${SRC_DIR}/pac
 	sed -i 's|@@@USER@@@|${USER}|g' ${TMP_DIR}/tmp_kickstart.cfg
 	sed -i 's|@@@ROOT_PASSWD@@@|${ROOT_PASSWD}|g' ${TMP_DIR}/tmp_kickstart.cfg
 	sed -i 's|@@@USER_PASSWD@@@|${USER_PASSWD}|g' ${TMP_DIR}/tmp_kickstart.cfg
+	sed -i 's|@@@DISK@@@|${DISK}|g' ${TMP_DIR}/tmp_kickstart.cfg
 
 ${TMP_DIR}/tmp_grub.cfg: ${TMP_DIR} ${SRC_DIR}/grub.cfg
 	cp ${SRC_DIR}/grub.cfg ${TMP_DIR}/tmp_grub.cfg
