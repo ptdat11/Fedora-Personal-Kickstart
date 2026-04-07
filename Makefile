@@ -39,6 +39,8 @@ ${PERSONAL_ISO_PATH}: ${BASE_ISO_PATH} ${ISO_DIST_DIR} ${TMP_DIR}/tmp_grub.cfg $
 	cp ${TMP_DIR}/tmp_grub.cfg ${MOUNT_DIR}/EFI/BOOT/grub.cfg
 	cp -r ${SRC_DIR}/bin ${MOUNT_DIR}
 	rsync -a ${SRC_DIR}/dots-hyprland ${MOUNT_DIR}
+	rsync -a ${SRC_DIR}/zsh-plugins ${MOUNT_DIR}
+	rsync -a ${SRC_DIR}/dots-nvim ${MOUNT_DIR}
 
 	sed -i 's/@@@MOKUTIL_PASSWD@@@/${MOKUTIL_PASSWD}/' ${MOUNT_DIR}/bin/post_install.sh
 

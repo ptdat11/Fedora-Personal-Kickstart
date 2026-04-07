@@ -12,7 +12,7 @@ timedatectl set-local-rtc 0
 optimize_system() {
 	dnf config-manager setopt max_parallel_downloads=10
 	dnf config-manager setopt fastestmirror=true
-	dnf swap ffmpeg-free ffmpeg
+	dnf swap ffmpeg-free ffmpeg --allowerasing
 	systemctl disable NetworkManager-wait-online.service
 }
 
@@ -27,8 +27,8 @@ setup_xdg() {
   done
 
 	# Set default apps
-  xdg-mime default mpv.desktop video/mp4
-	xdg-mime default firefox.desktop application/pdf
+  runuser -l "$user" -c 'xdg-mime default mpv.desktop video/mp4'
+	runuser -l "$user" -c 'xdg-mime default firefox.desktop application/pdf'
 }
 
 mok_enroll_uefi() {
@@ -55,11 +55,15 @@ install_hyprland_end4() {
 
 	# Fix an error where Swappy cannot open image properly from Dolphin
 	sed -i -E $'s#^Exec=.*#Exec=sh -c \'if [ -n "$*" ]; then exec swappy -f "$@"; else grim -g "$(slurp)" - | swappy -f -; fi\' -- %F#' /usr/share/applications/swappy.desktop
+
+	# Fix theme changing error
+	# runuser -l ptdat -c $'sed -i -E \'s/^(\s*)(matugen_args=.*)/\1# \2/\' ~/.config/quickshell/ii/scripts/colors/switchwall.sh'
+	runuser -l ptdat -c $'sed -i -E \'/^def\s+reload\(\):/a \\\\treturn\' ~/.local/state/quickshell/.venv/lib/python3.12/site-packages/kde_material_you_colors/utils/kwin_utils.py'
 }
 
 install_astronvim() {
 	local user="$1"
-	runuser -l "$user" -c 'git clone --depth 1 https://github.com/AstroNvim/template ~/.config/nvim'
+	runuser -l "$user" -c 'cp -r /opt/dots-nvim ~/.config/nvim'
 	runuser -l "$user" -c 'rm -rf ~/.config/nvim/.git'
 
 	runuser -l "$user" -c $'sed -E \'s/^(\s*relativenumber\s*=\s*)(true|false)(.*)/\1false\3/\' ~/.config/nvim/lua/plugins/astrocore.lua'
@@ -74,7 +78,7 @@ install_fcitx5_lotus() {
 	dnf config-manager addrepo --from-repofile=https://fcitx5-lotus.pages.dev/rpm/fedora/fcitx5-lotus-$RELEASEVER.repo
 	dnf install -y fcitx5-lotus
 
-	systemctl enable --now fcitx5-lotus-server@"$user".service || (sudo systemd-sysusers && sudo systemctl enable --now fcitx5-lotus-server@"$user".service)
+	systemctl enable fcitx5-lotus-server@"$user".service || (sudo systemd-sysusers && sudo systemctl enable fcitx5-lotus-server@"$user".service)
 
 	runuser -l "$user" -c 'echo "export GTK_IM_MODULE=fcitx" >> ~/.bash_profile'
 	runuser -l "$user" -c 'echo "export QT_IM_MODULE=fcitx" >> ~/.bash_profile'
@@ -99,21 +103,20 @@ install_zsh() {
 	local user="$1"
 
 	# Install Oh My Zsh (plugin manager for zsh)
-	runuser -l "$user" -c 'yes | sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"'
+	runuser -l "$user" -c "yes | sh $SCRIPT_DIR/install_zsh"
 	runuser -l "$user" -c $'sed -i -E \'s/^\s*ZSH_THEME=.*/ZSH_THEME=""/\' ~/.zshrc'
 	# Install Oh My Zsh plugins
 	{
-		# zsh-autosuggestions
-		runuser -l "$user" -c 'git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions'
-		runuser -l "$user" -c "$(declare -f add_omz_plugin); add_omz_plugin zsh-autosuggestions"
+		runuser -l "$user" -c 'cp -r /opt/zsh-plugins/* ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/'
 
-		# zsh-syntax-highlighting
-		runuser -l "$user" -c 'git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting'
-		runuser -l "$user" -c "$(declare -f add_omz_plugin); add_omz_plugin zsh-syntax-highlighting"
-
-		# zsh-vi-mode
-		runuser -l "$user" -c 'git clone https://github.com/jeffreytse/zsh-vi-mode ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-vi-mode'
-		runuser -l "$user" -c "$(declare -f add_omz_plugin); add_omz_plugin zsh-vi-mode"
+		plugins=(
+			zsh-autosuggestions
+			zsh-syntax-highlighting
+			zsh-vi-mode
+		)
+		for plugin in ${plugins[@]}; do
+			runuser -l "$user" -c "$(declare -f add_omz_plugin); add_omz_plugin $plugin"
+		done
 	}
 
 	# Apply all ~/.config/zshrc.d/*.zsh files

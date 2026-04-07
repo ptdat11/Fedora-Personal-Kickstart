@@ -1,3 +1,15 @@
 [submodule "src/dots-hyprland"]
 	path = src/dots-hyprland
 	url = https://github.com/end-4/dots-hyprland
+[submodule "src/zsh-plugins/zsh-autosuggestions"]
+	path = src/zsh-plugins/zsh-autosuggestions
+	url = https://github.com/zsh-users/zsh-autosuggestions
+[submodule "src/zsh-plugins/zsh-syntax-highlighting"]
+	path = src/zsh-plugins/zsh-syntax-highlighting
+	url = https://github.com/zsh-users/zsh-syntax-highlighting.git
+[submodule "src/zsh-plugins/zsh-vi-mode"]
+	path = src/zsh-plugins/zsh-vi-mode
+	url = https://github.com/jeffreytse/zsh-vi-mode.git
+[submodule "src/dots-nvim"]
+	path = src/dots-nvim
+	url = https://github.com/AstroNvim/template
