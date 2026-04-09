@@ -1,0 +1,13 @@
+[Unit]
+Description=Run Script Once on First Boot
+# Ensures this only runs if the system is truly in its first boot state
+ConditionFirstBoot=yes
+
+[Service]
+Type=oneshot
+ExecStart=/opt/firstboot.sh
+# Optional: Ensure the service stays 'active' so it doesn't try to re-run
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

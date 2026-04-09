@@ -13,3 +13,6 @@
 [submodule "src/dots-nvim"]
 	path = src/dots-nvim
 	url = https://github.com/AstroNvim/template
+[submodule "src/ii-sddm-theme"]
+	path = src/ii-sddm-theme
+	url = https://github.com/3d3f/ii-sddm-theme
