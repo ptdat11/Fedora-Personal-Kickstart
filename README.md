@@ -99,4 +99,3 @@ To manage the test VM:
 
 - **Permissions**: Ensure you have the necessary permissions to mount/extract ISOs or run `virt-install`.
 - **Base ISO**: If the download fails, you can manually place the `Fedora-Everything-netinst-x86_64-43-1.6.iso` file in the project root.
-- **Cleaning up**: Since the `clean` target is not fully defined, you can manually remove the `tmp/`, `dist/`, or `base-iso/` directories if you want a fresh start.

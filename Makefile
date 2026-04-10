@@ -125,3 +125,7 @@ ${TMP_DIR}/tmp_kickstart.cfg: ${TMP_DIR} ${SRC_DIR}/kickstart.cfg ${SRC_DIR}/pac
 ${TMP_DIR}/tmp_grub.cfg: ${TMP_DIR} ${SRC_DIR}/grub.cfg
 	cp ${SRC_DIR}/grub.cfg ${TMP_DIR}/tmp_grub.cfg
 	sed -i 's/@@@VOLID@@@/${VOLID}/g' ${TMP_DIR}/tmp_grub.cfg
+
+
+clean:
+	rm -rf ${TMP_DIR} ${ISO_DIST_DIR} ${MOUNT_DIR}
