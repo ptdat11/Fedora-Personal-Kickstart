@@ -42,6 +42,7 @@ ${PERSONAL_ISO_PATH}: ${BASE_ISO_PATH} ${ISO_DIST_DIR} ${TMP_DIR}/tmp_grub.cfg $
 	rsync -a ${SRC_DIR}/dots-hyprland ${MOUNT_DIR}
 	rsync -a ${SRC_DIR}/zsh-plugins ${MOUNT_DIR}
 	rsync -a ${SRC_DIR}/dots-nvim ${MOUNT_DIR}
+	rsync -a ${SRC_DIR}/ii-sddm-theme ${MOUNT_DIR}
 
 	sed -i 's/@@@MOKUTIL_PASSWD@@@/${MOKUTIL_PASSWD}/' ${MOUNT_DIR}/bin/post_install.sh
 

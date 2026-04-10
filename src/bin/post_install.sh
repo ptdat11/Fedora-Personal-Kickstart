@@ -142,6 +142,14 @@ install_zsh() {
 	runuser -l "$user" -c 'rm -rf ~/.config/fish'
 }
 
+install_sddm_theme() {
+	user="$1"
+	sed -i -E 's/^\s*(%wheel\s+ALL=\(ALL\)\s+)ALL/\1NOPASSWD: ALL/' /etc/sudoers
+	runuser -l "$user" -c "(echo y; echo 1) | bash $SCRIPT_DIR/install_sddm_theme.sh"
+	# Restore password requirement of $user
+	sed -i -E 's/^\s*(%wheel\s+ALL=\(ALL\)\s+)NOPASSWD: ALL/\1ALL/' /etc/sudoers
+}
+
 optimize_system
 setup_xdg "$USER"
 mok_enroll_uefi
@@ -149,3 +157,4 @@ install_hyprland_end4 "$USER"
 install_astronvim "$USER"
 install_fcitx5_lotus "$USER"
 install_zsh "$USER"
+install_sddm_theme "$USER"
