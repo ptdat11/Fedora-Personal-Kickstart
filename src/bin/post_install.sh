@@ -2,12 +2,12 @@
 SCRIPT_DIR="$(dirname "$0")"
 USER="$1"
 
-# Special thanks to: https://github.com/devangshekhawat/Fedora-43-Post-Install-Guide
-# RPM Fusion & Terra
-dnf install -y https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
-dnf install -y --nogpgcheck --repofrompath 'terra,https://repos.fyralabs.com/terra$releasever' terra-release
-
-timedatectl set-local-rtc 0
+external_repos() {
+# Special thanks to: https://github.com/devangshekhawat/Fedora-44-Post-Install-Guide
+	# RPM Fusion & Terra
+	dnf install -y https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
+	dnf install -y --nogpgcheck --repofrompath 'terra,https://repos.fyralabs.com/terra$releasever' terra-release
+}
 
 optimize_system() {
 	dnf config-manager setopt max_parallel_downloads=10
@@ -154,6 +154,7 @@ cleanup_kickstart() {
 	rm /root/anaconda-ks.cfg
 }
 
+external_repos 
 optimize_system
 setup_xdg "$USER"
 mok_enroll_uefi
