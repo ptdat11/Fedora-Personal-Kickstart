@@ -2,6 +2,36 @@
 
 This project provides a streamlined way to create a customized Fedora Everything netinst ISO with automated kickstart configuration, pre-installed packages, and pre-configured dotfiles/scripts.
 
+## Screenshots
+
+<p align="center">
+  <img src="demo/demo1.png" width="45%" />
+  <img src="demo/demo2.png" width="45%" />
+  <img src="demo/demo3.png" width="45%" />
+  <img src="demo/demo4.png" width="45%" />
+</p>
+
+## Notable Features
+
+- **System Optimizations**:
+  - DNF parallel downloads (10) and fastest mirror selection.
+  - Full FFmpeg support (swapped from `ffmpeg-free`).
+  - Disabled `NetworkManager-wait-online.service` for faster boot.
+- **Desktop Environment (Hyprland)**:
+  - Automated installation of **End-4 dotfiles**.
+  - Custom fixes for Swappy, Dolphin, and theme transitions.
+  - Pre-configured SDDM with a personalized theme.
+- **Development & Shell**:
+  - **AstroNvim** pre-configured and ready to use.
+  - **Zsh** as the default shell (replacing fish) with Oh My Zsh, Starship, and plugins (autosuggestions, syntax highlighting, vi-mode).
+- **Localization & Input**:
+  - **Fcitx5-Lotus** integrated for Vietnamese input.
+- **Hardware Support**:
+  - Automated **MOK enrollment** for Secure Boot compatibility (essential for NVIDIA drivers).
+- **User Experience**:
+  - Normalized XDG directories (lowercase: `~/downloads`, `~/documents`, etc.).
+  - Default application associations (e.g., MPV for video, Firefox for PDF).
+
 ## Prerequisites
 
 Ensure you have the following tools installed on your system:
