@@ -95,11 +95,9 @@ load_os: destroy_vm ${ISO_DIST_DIR}/fedora.qcow2
 		--check path_in_use=off
 
 destroy_vm:
-	if virsh list | grep ${VM_NAME}; then \
-		virsh shutdown ${VM_NAME}; \
-		virsh destroy ${VM_NAME}; \
-		virsh undefine ${VM_NAME} --managed-save --nvram; \
-	fi
+	virsh shutdown ${VM_NAME} 2> /dev/null
+	virsh destroy ${VM_NAME} 2> /dev/null
+	virsh undefine ${VM_NAME} --managed-save --nvram 2> /dev/null
 
 
 ${BASE_ISO_PATH}:
