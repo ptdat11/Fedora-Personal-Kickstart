@@ -150,6 +150,10 @@ install_sddm_theme() {
 	sed -i -E 's/^\s*(%wheel\s+ALL=\(ALL\)\s+)NOPASSWD: ALL/\1ALL/' /etc/sudoers
 }
 
+cleanup_kickstart() {
+	rm /root/anaconda-ks.cfg
+}
+
 optimize_system
 setup_xdg "$USER"
 mok_enroll_uefi
@@ -158,3 +162,5 @@ install_astronvim "$USER"
 install_fcitx5_lotus "$USER"
 install_zsh "$USER"
 install_sddm_theme "$USER"
+
+cleanup_kickstart
