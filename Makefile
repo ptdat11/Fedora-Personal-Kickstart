@@ -17,11 +17,11 @@ TMP_DIR := ./tmp
 MOUNT_DIR := ./base-iso
 
 # Kickstart information
-USER = $(shell grep -E '^USER=' ./config | cut -d= -f2)
-ROOT_PASSWD = $(shell grep -E '^ROOT_PASSWD=' ./.secrets | cut -d= -f2 | tr -d ' ')
-USER_PASSWD = $(shell grep -E '^USER_PASSWD=' ./.secrets | cut -d= -f2 | tr -d ' ')
-MOKUTIL_PASSWD = $(shell grep -E '^MOKUTIL_PASSWD=' ./.secrets | cut -d= -f2 | tr -d ' ')
-DISK = $(shell grep -E '^DISK=' ./config | cut -d= -f2 | tr -d ' ')
+USER = $(shell grep -E '^USER=' ./.env | cut -d= -f2 | tr -d ' ')
+ROOT_PASSWD = $(shell grep -E '^ROOT_PASSWD=' ./.env | cut -d= -f2 | tr -d ' ')
+USER_PASSWD = $(shell grep -E '^USER_PASSWD=' ./.env | cut -d= -f2 | tr -d ' ')
+MOKUTIL_PASSWD = $(shell grep -E '^MOKUTIL_PASSWD=' ./.env | cut -d= -f2 | tr -d ' ')
+DISK = $(shell grep -E '^DISK=' ./.env | cut -d= -f2 | tr -d ' ')
 
 .PHONY: install_os destroy_vm clean build
 
