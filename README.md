@@ -44,18 +44,14 @@ Ensure you have the following tools installed on your system:
 
 Before building the ISO, you need to set up your configuration and secrets.
 
-### 1. Secrets Configuration
-Create a `.secrets` file by copying the template:
+Create a `.env` file by copying the template:
 ```bash
-cp template.secrets .secrets
+cp template.env .env
 ```
-Edit `.secrets` and provide the following passwords:
+Edit `.env` and provide the following passwords:
 - `ROOT_PASSWD`: Root user password.
 - `USER_PASSWD`: Personal user password.
 - `MOKUTIL_PASSWD`: Password for Secure Boot MOK utility.
-
-### 2. General Configuration
-Edit the `config` file to match your environment:
 - `USER`: The username for the primary account.
 - `DISK`: The target disk for installation (e.g., `nvme0n1` or `sda`).
 
