@@ -150,6 +150,13 @@ install_sddm_theme() {
 	sed -i -E 's/^\s*(%wheel\s+ALL=\(ALL\)\s+)NOPASSWD: ALL/\1ALL/' /etc/sudoers
 }
 
+install_warp_vpn() {
+	dnf config-manager addrepo --from-repofile=https://pkg.cloudflareclient.com/cloudflare-warp-ascii.repo
+	dnf install -y cloudflare-warp
+
+	yes | warp-cli registration new
+}
+
 cleanup_kickstart() {
 	rm /root/anaconda-ks.cfg
 }
@@ -163,5 +170,6 @@ install_astronvim "$USER"
 install_fcitx5_lotus "$USER"
 install_zsh "$USER"
 install_sddm_theme "$USER"
+install_warp_vpn
 
 cleanup_kickstart
